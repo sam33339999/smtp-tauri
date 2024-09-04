@@ -40,12 +40,12 @@ async fn send_mail(smtp: SmtpCombine) -> Result<String, String> {
         );
 
         let mail = Message::builder()
-        .from(smtp.content.from.clone().parse().unwrap())
-        .to(smtp.content.to.clone().parse().unwrap())
-        .subject(smtp.content.subject.clone())
-        .header(ContentType::TEXT_HTML)
-        .body(smtp.content.html.clone())
-        .unwrap();
+            .from(smtp.content.from.clone().parse().unwrap())
+            .to(smtp.content.to.clone().parse().unwrap())
+            .subject(smtp.content.subject.clone())
+            .header(ContentType::TEXT_HTML)
+            .body(smtp.content.html.clone())
+            .unwrap();
 
         // let mailer = SmtpTransport::builder_dangerous(smtp.config.host.clone().as_str())
         let mailer = SmtpTransport::relay(smtp.config.host.clone().as_str())

@@ -24,7 +24,7 @@ watch(localForm, (newVal, oldVal) => {
       <label for="host">目標主機(target host)</label>
       <InputText id="host" v-model="localForm.host"></InputText>
       <label for="port">目標埠號(target port)</label>
-      <InputText id="port" v-model="localForm.port"></InputText>
+      <InputText id="port" v-model="localForm.port" placeholder="25,465(SSL),587(TLS)"></InputText>
       <label for="username">帳號(username)</label>
       <InputText id="username" v-model="localForm.username"></InputText>
       <label for="password">密碼(password)</label>

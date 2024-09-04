@@ -36,9 +36,6 @@ watch(sendForm, (newVal, oldVal) => {
       <label for="subject">主旨(subject)</label>
       <InputText id="subject" v-model="sendForm.subject"></InputText>
 
-      <label for="text">純文字(text)</label>
-      <InputText id="text" v-model="sendForm.text"></InputText>
-
       <label for="html">內文(html)</label>
       <Editor id="html" v-model="sendForm.html" editorStyle="height: 320px" />
     </div>
