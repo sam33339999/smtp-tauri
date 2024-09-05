@@ -65,3 +65,9 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+      - name: Upload release assets
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-artifacts
+          path: ${{ env.CARGO_TARGET_DIR || 'target' }}/release/bundle
