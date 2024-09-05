@@ -10,11 +10,17 @@ import Message from 'primevue/message';
 import Panel from 'primevue/panel';
 import ProgressBar from 'primevue/progressbar';
 
-const config = ref({host: "127.0.0.1", port: 1025, username: "", password: ""});
-const content = ref({from: "", to: "", subject: "測試", text: "???", html: "<h2><Hello World !!!/h2>"});
+const config = ref({host: "127.0.0.1", port: 25, username: "", password: "", security: "None"});
+const content = ref({from: "", to: "", subject: "主旨", html: ""});
 const retMessages = ref([]);
 const pendingMessages = ref([]);
 
+const templates = [
+  {label: "basic(25)", host: "127.0.0.1", port: 25, security: "None"},
+  {label: "Mailpit", host: "127.0.0.1", port: 1025, security: "None"},
+  {label: "Gmail", host: "smtp.gmail.com", port: 587, security: "StartTLS"},
+  {label: "AWS(northeast-1)", host: "email-smtp.ap-northeast-1.amazonaws.com", port: 587, security: "StartTLS"},
+];
 
 // 清除等待處理的消息 by identify
 const dropPendingMessage = (identify) => {
@@ -31,8 +37,9 @@ const sendMail = async () => {
         config: {
           host: config.value.host,
           port: parseInt(config.value.port),
-          username: config.value.username,
-          password: config.value.password,
+          username: config.value.username === "" ? null : config.value.username,
+          password: config.value.password === "" ? null : config.value.password,
+          security: config.value.security,
         },
         content: content.value,
       }
@@ -66,7 +73,7 @@ const cleanAll = () => {
 <template>
   <div class="m-2 h-64 mt-4 flex">
     <div class="mx-2" style="width: 25%">
-      <SmtpForm v-model:setting="config"></SmtpForm>
+      <SmtpForm :hasTemplates="templates" label="配置" v-model:setting="config"></SmtpForm>
       <Divider />
 
       <div class="mt-10 w-full flex justify-around ">
@@ -85,7 +92,7 @@ const cleanAll = () => {
     </div>
 
     <div class="mx-2" style="width: 75%">
-      <SmtpContent v-model:form="content"></SmtpContent>
+      <SmtpContent label="信件內容" v-model:form="content"></SmtpContent>
       <ProgressBar :value="pendingMessages.length"/>
     </div>
 

@@ -9,6 +9,10 @@ const props = defineProps({
     type: Object, // {from: "", to: "", subject: "", text: "", html: ""}
     required: true,
   },
+  label: {
+    type: String,
+    default: "content",
+  },
 });
 const emit = defineEmits(['update:form']);
 const sendForm = ref({ ...props.form });
@@ -20,12 +24,7 @@ watch(sendForm, (newVal, oldVal) => {
 </script>
 
 <template>
-  <Panel>
-
-    <template #header="props">
-      <span class="w-full" :class="props.class">content</span>
-    </template>
-
+  <Panel :header="props.label">
     <div style="display: flex; flex-direction: column;">
       <label for="from">從(from)</label>
       <InputText id="from" v-model="sendForm.from"></InputText>
@@ -43,11 +42,4 @@ watch(sendForm, (newVal, oldVal) => {
 </template>
 
 <style scoped>
-.p-panel-header {
-  background-color: red !important;
-}
-
-/* * {
-  background-color: lightgray !important;
-} */
 </style>

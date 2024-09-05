@@ -11,3 +11,13 @@
 > IMAP 以前稱作`交互郵件訪問協議`是一個應用層協議，
 > 用來以本地郵件客戶端工具(如: MS Outlook, Outlook Express, Foxmail, Mozilla Thunderbird) 存取遠端服務器的郵件。<br/>
 
+
+
+- 25: 傳統的非加密 SMTP 端口（通常被阻擋或不推薦使用）
+- 465: SSL 加密的 SMTP 端口
+- 587: TLS 加密的 SMTP 端口（現代推薦使用）
+
+### 從 mailer 變成 mail_builder
+> 使用 `SmtpTransport::builder_dangerous` 替代 `SmtpTransport::relay`，<br/>
+> 這允許我們連接到非標準端口（如 Mailpit 的 1025）<br/><br/>
+> 在使用 builder 去指定是否加密連接。
