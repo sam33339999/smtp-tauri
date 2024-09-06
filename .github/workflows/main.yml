@@ -1,18 +1,17 @@
-name: 'publish'
+name: App Builder
 
 on:
   push:
-    branches:
-      - release
-
-# This workflow will trigger on each push to the `release` branch to create or update a GitHub release, build your app, and upload the artifacts to the release.
+    tags:
+      - "v*"
+  workflow_dispatch: # 手動觸發
 
 jobs:
   publish-tauri:
     permissions:
       contents: write
     strategy: # 多種策略
-      fail-fast: false
+      fail-fast: true # 當其中一個策略失敗時，是否停止其他策略
       matrix:
         include:
           - platform: 'macos-latest' # MacOS on Apple Silicon. (Arm(M1) 芯片)
@@ -78,40 +77,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          tagName: ${{ github.ref_name }} # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'App v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
           # args: ${{ matrix.target != '' && format('--target {0}', matrix.target) || '' }}
-
-      # 上傳編譯後的檔案(artifact)
-      - name: Upload release assets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # 移除額外的引號和方括號
-          CLEANED_PATHS=$(echo '${{ steps.tauri_build.outputs.artifactPaths }}' | sed 's/^\[//;s/\]$//;s/"//g')
-          IFS=',' read -ra ARTIFACT_PATHS <<< "$CLEANED_PATHS"
-          for path in "${ARTIFACT_PATHS[@]}"; do
-            # 去除路徑前後的空白字符
-            path=$(echo "$path" | xargs)
-            if [ -f "$path" ]; then
-              filename=$(basename "$path")
-              echo "Uploading $filename"
-              upload_url=$(echo '${{ steps.tauri_build.outputs.releaseUploadUrl }}' | sed 's/{?name,label}//')
-              response=$(curl -L \
-                -X POST \
-                -H "Accept: application/vnd.github+json" \
-                -H "Authorization: Bearer $GITHUB_TOKEN" \
-                -H "Content-Type: application/octet-stream" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                "${upload_url}?name=${filename}" \
-                --data-binary "@$path")
-              echo "Upload response: $response"
-            else
-              echo "File not found: $path"
-            fi
-          done
-        shell: bash
