@@ -89,17 +89,24 @@ jobs:
       # 上傳編譯後的檔案(artifact)
       - name: Upload release assets
         run: |
-          IFS=',' read -ra ARTIFACT_PATHS <<< "${{ steps.tauri_build.outputs.artifactPaths }}"
+          # 移除額外的引號和方括號
+          CLEANED_PATHS=$(echo '${{ steps.tauri_build.outputs.artifactPaths }}' | sed 's/^\[//;s/\]$//;s/"//g')
+          IFS=',' read -ra ARTIFACT_PATHS <<< "$CLEANED_PATHS"
           for path in "${ARTIFACT_PATHS[@]}"; do
-            filename=$(basename "$path")
-            echo "Uploading $filename"
-            curl -L \
-              -X POST \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Content-Type: application/octet-stream" \
-              "${{ steps.tauri_build.outputs.releaseUploadUrl }}?name=$filename" \
-              --data-binary "@$path"
+            # 去除路徑前後的空白字符
+            path=$(echo "$path" | xargs)
+            if [ -f "$path" ]; then
+              filename=$(basename "$path")
+              echo "Uploading $filename"
+              curl -L \
+                -X POST \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Content-Type: application/octet-stream" \
+                "${{ steps.tauri_build.outputs.releaseUploadUrl }}?name=$filename" \
+                --data-binary "@$path"
+            else
+              echo "File not found: $path"
+            fi
           done
         shell: bash
-
