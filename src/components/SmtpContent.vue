@@ -26,16 +26,16 @@ watch(sendForm, (newVal, oldVal) => {
 <template>
   <Panel :header="props.label">
     <div style="display: flex; flex-direction: column;">
-      <label for="from">從(from)</label>
+      <label class="mb-2" for="from">從(from)</label>
       <InputText id="from" v-model="sendForm.from"></InputText>
       
-      <label for="to">到(to)</label>
+      <label class="my-2" for="to">到(to)</label><span class="text-gray-400 text-sm">增加標籤的話請自行添加+tag, 舉例像是: info+test+hello@gmail.com</span>
       <InputText id="to" v-model="sendForm.to"></InputText>
 
-      <label for="subject">主旨(subject)</label>
+      <label class="my-2" for="subject">主旨(subject)</label>
       <InputText id="subject" v-model="sendForm.subject"></InputText>
 
-      <label for="html">內文(html)</label>
+      <label class="my-2" for="html">內文(html)</label>
       <Editor id="html" v-model="sendForm.html" editorStyle="height: 320px" />
     </div>
   </Panel>

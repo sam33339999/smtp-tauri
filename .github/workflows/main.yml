@@ -1,44 +1,58 @@
-name: 'publish'
+name: App Builder
 
 on:
   push:
-    branches:
-      - release
-
-# This workflow will trigger on each push to the `release` branch to create or update a GitHub release, build your app, and upload the artifacts to the release.
+    tags:
+      - "v*"
+  workflow_dispatch: # 手動觸發
 
 jobs:
   publish-tauri:
     permissions:
       contents: write
-    strategy:
-      fail-fast: false
+    strategy: # 多種策略
+      fail-fast: true # 當其中一個策略失敗時，是否停止其他策略
       matrix:
         include:
-          - platform: 'macos-latest' # for Arm based macs (M1 and above).
+          - platform: 'macos-latest' # MacOS on Apple Silicon. (Arm(M1) 芯片)
             args: '--target aarch64-apple-darwin'
-          - platform: 'macos-latest' # for Intel based macs.
+            short_name: 'darwin-arm64'
+          - platform: 'macos-latest' # MacOS on Intel. (x86_64)
             args: '--target x86_64-apple-darwin'
+            short_name: 'darwin-amd64'
           - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
             args: ''
+            short_name: 'linux-x64'
           - platform: 'windows-latest'
             args: ''
+            short_name: 'win-x64'
 
+    # 使用對應流的平台進行編譯
     runs-on: ${{ matrix.platform }}
     steps:
+      # 使用 `actions/checkout@v4` checkout 出專案
       - uses: actions/checkout@v4
 
+      # 安裝 nodejs, 並且使用 lts/* 版本
       - name: setup node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
 
+      # 安裝 Rust 穩定版本
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
+          # 這個目標只有作用在 macos runner 上，所以在 `if` 中可以稍微加快 windows 和 linux 的構建速度。
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
+      # 使用 swatinem/rust-cache@v2 進行緩存
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      # 安裝依賴 (僅限 ubuntu)
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
         run: |
@@ -47,16 +61,26 @@ jobs:
         # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
         # You can remove the one that doesn't apply to your app to speed up the workflow a bit.
 
-      - name: install frontend dependencies
-        run: yarn install # change this to npm, pnpm or bun depending on which one you use.
+      # 安裝 pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
 
+      # 安裝前端依賴
+      - name: install frontend dependencies
+        run: pnpm install # change this to npm, pnpm or bun depending on which one you use.
+
+      # 編譯 tauri 專案
       - uses: tauri-apps/tauri-action@v0
+        id: tauri_build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          tagName: ${{ github.ref_name }} # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'App v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+          # args: ${{ matrix.target != '' && format('--target {0}', matrix.target) || '' }}
