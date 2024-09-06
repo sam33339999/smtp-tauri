@@ -88,11 +88,18 @@ jobs:
 
       # 上傳編譯後的檔案(artifact)
       - name: Upload release assets
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.tauri_build.outputs.releaseUploadUrl }}
-          asset_path: ${{ steps.tauri_build.outputs.artifactPaths }}
-          asset_name: ${{ matrix.short_name }}-app-v__VERSION__.${{ steps.tauri_build.outputs.artifactExtension }}
-          asset_content_type: application/octet-stream
+        run: |
+          IFS=',' read -ra ARTIFACT_PATHS <<< "${{ steps.tauri_build.outputs.artifactPaths }}"
+          for path in "${ARTIFACT_PATHS[@]}"; do
+            filename=$(basename "$path")
+            echo "Uploading $filename"
+            curl -L \
+              -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/octet-stream" \
+              "${{ steps.tauri_build.outputs.releaseUploadUrl }}?name=$filename" \
+              --data-binary "@$path"
+          done
+        shell: bash
+
