@@ -11,7 +11,7 @@
 
 ## 開發...
 
-> 由於使用了 `Tauri` 並且覺得指令有點稍微的麻罰；故使用 Makefile 簡化指令。
+> 由於使用了 `Tauri` 並且覺得指令有點稍微的麻煩；故使用 Makefile 簡化指令。
 ```bash
 # development.
 make dev
