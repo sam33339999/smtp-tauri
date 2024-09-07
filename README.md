@@ -1,11 +1,26 @@
-# Tauri + Vue 3
+# smtp-tauri
 
-This template should help get you started developing with Tauri + Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+![smtp-tauri](./assets/screenshot.png)
 
-## Recommended IDE Setup
+> 透過 tauri 建構的一個小工具，用於測試 SMTP 發信功能；<br/>
+> 本專案使用 `Vue3` + `Vite` + `Tauri` + `Rust` 構建。<br/><br/>
+>
+> - PrimeVue: UI Framework for Vue3 
+> - TailwindCSS: A utility-first CSS framework for rapid UI development.
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 
+## 開發...
 
+> 由於使用了 `Tauri` 並且覺得指令有點稍微的麻罰；故使用 Makefile 簡化指令。
+```bash
+# development.
+make dev
+
+# build to binary file.
+make build
+
+# with develop, use tailwindcss should be upload.
+make tailwind
+```
 - [SMTP 筆記](./SMTP_NOTE.md)
 - Learn more about Tauri commands at [Tauri commands](https://tauri.app/v1/guides/features/command)
